@@ -38,10 +38,24 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
 cd $BUILD_DIR
 dotnet --info
 
+trim() {
+    # Determine if 'extglob' is currently on.
+    local extglobWasOff=1
+    shopt extglob >/dev/null && extglobWasOff=0 
+    (( extglobWasOff )) && shopt -s extglob # Turn 'extglob' on, if currently turned off.
+    # Trim leading and trailing whitespace
+    local var=$1
+    var=${var##+([[:space:]])}
+    var=${var%%+([[:space:]])}
+    (( extglobWasOff )) && shopt -u extglob # If 'extglob' was off before, turn it back off.
+    echo -n "$var"  # Output trimmed string.
+}
+
 if [ -e ${BUILD_DIR}/Projfile ]; then
-	APROJECT_JSON_FILE=`cat Projfile`
-	#PROJECT_JSON_FILE=$(sed -e 's/[[:space:]]*$//' <<<${APROJECT_JSON_FILE})
-	PROJECT_JSON_FILE="$(echo -e "${APROJECT_JSON_FILE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+	PROJECT_JSON_FILE=$(trim "$(cat Projfile)")
+	#APROJECT_JSON_FILE=`cat Projfile`
+	##PROJECT_JSON_FILE=$(sed -e 's/[[:space:]]*$//' <<<${APROJECT_JSON_FILE})
+	#PROJECT_JSON_FILE="$(echo -e "${APROJECT_JSON_FILE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 	echo "found def project ${PROJECT_JSON_FILE}"
 else
 	PROJECT_JSON_FILES=$(find ${BUILD_DIR}/. -maxdepth 5 -iname "*.csproj")
