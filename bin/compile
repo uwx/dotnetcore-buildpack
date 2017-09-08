@@ -51,8 +51,8 @@ dotnet publish $PROJECT_JSON_FILE --output ${BUILD_DIR}/heroku_output --configur
 echo "cleanup"
 dotnet_cleanup $BUILD_DIR
 
-if [ ! -e ${BUILD_DIR}/Procfile ]; then
-	cat << EOT >> ${BUILD_DIR}/Procfile
-console: cd \$HOME/heroku_output && dotnet ./${PROJECT_NAME}.exe
-EOT
-fi
+#if [ ! -e ${BUILD_DIR}/Procfile ]; then
+#	cat << EOT >> ${BUILD_DIR}/Procfile
+#console: cd \$HOME/heroku_output && dotnet ./${PROJECT_NAME}.exe
+#EOT
+#fi
