@@ -43,7 +43,7 @@ printf 'Found %s csproj files\n' $(echo "$PROJECT_JSON_FILES" | wc -l | tr -d ' 
 PROJECT_JSON_FILE=$(echo "$PROJECT_JSON_FILES" | head -1)
 
 #PROJECT_FILE=$(x=$(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)); while [[ "$x" =~ $BUILD_DIR ]] ; do find "$x" -maxdepth 1 -name *.csproj; x=`dirname "$x"`; done)
-#PROJECT_NAME=$(basename ${PROJECT_FILE%.*})
+PROJECT_NAME=$(basename ${PROJECT_JSON_FILE%.*})
 
 echo "publish ${PROJECT_JSON_FILE}"
 dotnet publish $PROJECT_JSON_FILE --output ${BUILD_DIR}/heroku_output --configuration Release --runtime linux-x64 --self-contained
