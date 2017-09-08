@@ -38,15 +38,23 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
 cd $BUILD_DIR
 dotnet --info
 
-PROJECT_FILE=$(x=$(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)); while [[ "$x" =~ $BUILD_DIR ]] ; do find "$x" -maxdepth 1 -name *.csproj; x=`dirname "$x"`; done)
-PROJECT_NAME=$(basename ${PROJECT_FILE%.*})
+PROJECT_JSON_FILES=$(find ${BUILD_DIR}/. -maxdepth 5 -iname "*.csproj")
+printf 'Found %s csproj files\n' $(echo "$PROJECT_JSON_FILES" | wc -l | tr -d ' ')
+PROJECT_JSON_FILE=$(echo "$PROJECT_JSON_FILES" | head -1)
 
-echo "publish ${PROJECT_FILE}"
-dotnet publish $PROJECT_FILE --output ${BUILD_DIR}/heroku_output --configuration Release --runtime linux-x64 --self-contained
+#PROJECT_FILE=$(x=$(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)); while [[ "$x" =~ $BUILD_DIR ]] ; do find "$x" -maxdepth 1 -name *.csproj; x=`dirname "$x"`; done)
+#PROJECT_NAME=$(basename ${PROJECT_FILE%.*})
+
+echo "publish ${PROJECT_JSON_FILE}"
+dotnet publish $PROJECT_JSON_FILE --output ${BUILD_DIR}/heroku_output --configuration Release --runtime linux-x64 --self-contained
 
 echo "cleanup"
 dotnet_cleanup $BUILD_DIR
 
-cat << EOT >> ${BUILD_DIR}/Procfile
-web: cd \$HOME/heroku_output && chmod +x ${PROJECT_NAME} && ASPNETCORE_URLS='http://+:\$PORT' ./${PROJECT_NAME} --server.urls http://+:\$PORT
+if [ -e ${SRC_DIR}/Procfile ]; then
+	cp ${SRC_DIR}/Procfile ${BUILD_DIR}
+else
+	cat << EOT >> ${BUILD_DIR}/Procfile
+console: cd \$HOME/heroku_output && dotnet ./${PROJECT_NAME}.exe
 EOT
+fi
