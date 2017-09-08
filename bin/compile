@@ -38,9 +38,16 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
 cd $BUILD_DIR
 dotnet --info
 
-PROJECT_JSON_FILES=$(find ${BUILD_DIR}/. -maxdepth 5 -iname "*.csproj")
-printf 'Found %s csproj files\n' $(echo "$PROJECT_JSON_FILES" | wc -l | tr -d ' ')
-PROJECT_JSON_FILE=$(echo "$PROJECT_JSON_FILES" | head -1)
+if [ -e ${BUILD_DIR}/Projfile ]; then
+	APROJECT_JSON_FILE=`cat Projfile`
+	#PROJECT_JSON_FILE=$(sed -e 's/[[:space:]]*$//' <<<${APROJECT_JSON_FILE})
+	PROJECT_JSON_FILE="$(echo -e "${APROJECT_JSON_FILE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+	echo "found def project ${PROJECT_JSON_FILE}"
+else
+	PROJECT_JSON_FILES=$(find ${BUILD_DIR}/. -maxdepth 5 -iname "*.csproj")
+	printf 'Found %s csproj files\n' $(echo "$PROJECT_JSON_FILES" | wc -l | tr -d ' ')
+	PROJECT_JSON_FILE=$(echo "$PROJECT_JSON_FILES" | head -1)
+fi
 
 #PROJECT_FILE=$(x=$(dirname $(find ${BUILD_DIR} -maxdepth 5 -iname Startup.cs | head -1)); while [[ "$x" =~ $BUILD_DIR ]] ; do find "$x" -maxdepth 1 -name *.csproj; x=`dirname "$x"`; done)
 PROJECT_NAME=$(basename ${PROJECT_JSON_FILE%.*})
