@@ -1,10 +1,13 @@
 # Heroku .NET Core Buildpack
 
-Heroku buildpack for .NET Core 2.0.0 console applications. This builds the first solution it can find.
+Heroku buildpack for .NET Core console applications.
+
+[![Build status](https://ci.appveyor.com/api/projects/status/5864d533m5d35nsa?svg=true)](https://ci.appveyor.com/project/jincod/dotnetcore-buildpack)
+
 
 ## Usage
 
-For Heroku-16 stack and .NET Core 2.0.0
+.NET Core latest stable
 
 ```bash
 heroku buildpacks:set https://github.com/uwx/dotnetcore-buildpack
@@ -18,7 +21,6 @@ dyno: cd $HOME/heroku_output && ./SolutionName
 More info
 
 - [Buildpack references](https://devcenter.heroku.com/articles/buildpacks#buildpack-references)
-- [Heroku-16 Stack](https://devcenter.heroku.com/articles/heroku-16-stack)
 
 ## Using MyGet and other external NuGet package sources
 

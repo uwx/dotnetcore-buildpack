@@ -2,11 +2,16 @@
 
 function install_dotnet() {
   local BUILD_DIR="$1"
+  local CACHE_DIR="$2"
+  local ZIP_NAME="dotnet-2.1.302.tar.gz"
 
-  # https://github.com/dotnet/core/blob/master/release-notes/download-archives/2.0.0-download.md
-  curl -sSL -o dotnet.tar.gz https://download.microsoft.com/download/1/B/4/1B4DE605-8378-47A5-B01B-2C79D6C55519/dotnet-sdk-2.0.0-linux-x64.tar.gz
-  mkdir -p ${BUILD_DIR}/.heroku/dotnet && tar zxf dotnet.tar.gz -C ${BUILD_DIR}/.heroku/dotnet
-  ln -s ${BUILD_DIR}/.heroku/dotnet /app
+  if [ ! -f $CACHE_DIR/$ZIP_NAME ]; then
+    curl -sSL -o $CACHE_DIR/$ZIP_NAME https://download.microsoft.com/download/4/0/9/40920432-3302-47a8-b13c-bbc4848ad114/dotnet-sdk-2.1.302-linux-x64.tar.gz
+  else
+    echo "$ZIP_NAME from cache folder"
+  fi
+
+  mkdir -p ${BUILD_DIR}/.heroku/dotnet && tar zxf $CACHE_DIR/$ZIP_NAME -C ${BUILD_DIR}/.heroku/dotnet
 }
 
 function dotnet_cleanup() {
@@ -27,52 +32,6 @@ function indent() {
     Darwin) sed -l "$c";;
     *)      sed -u "$c";;
   esac
-}
-
-function apt_install(){
-  echo "Install package"
-
-  local apt_cache_dir="$CACHE_DIR/apt/cache"
-  local apt_state_dir="$CACHE_DIR/apt/state"
-  
-  mkdir -p "$apt_cache_dir/archives/partial"
-  mkdir -p "$apt_state_dir/lists/partial"
-  
-  local apt_options="-o debug::nolocking=true -o dir::cache=$apt_cache_dir -o dir::state=$apt_state_dir"
-  
-  topic "Cleaning apt caches"
-  apt-get $apt_options clean | indent
-  
-  topic "Updating apt caches"
-  apt-get  --allow-unauthenticated $apt_options update | indent
-
-  for package in "$@"; do
-    if [[ $package == *deb ]]; then
-      local package_name=$(basename $package .deb)
-      local package_file=$apt_cache_dir/archives/$package_name.deb
-      topic "Fetching $package"
-      curl -s -L -z $package_file -o $package_file $package 2>&1 | indent
-    else
-      topic "Fetching .debs for $package"
-      apt-get $apt_options -y --force-yes -d install --reinstall $package | indent
-    fi
-  done
-  
-  mkdir -p "$BUILD_DIR/.apt"
-
-  for DEB in $(ls -1 $apt_cache_dir/archives/*.deb); do
-    topic "Installing $(basename $DEB)"
-    dpkg -x $DEB "$BUILD_DIR/.apt/"
-  done
-  
-  export PATH="$PATH:$BUILD_DIR/.apt/usr/bin"
-  export LD_LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/lib/i386-linux-gnu:$BUILD_DIR/.apt/usr/lib:${LD_LIBRARY_PATH-}"
-  export LIBRARY_PATH="$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu:$BUILD_DIR/.apt/usr/lib/i386-linux-gnu:$BUILD_DIR/.apt/usr/lib:${LIBRARY_PATH-}"
-  export INCLUDE_PATH="$BUILD_DIR/.apt/usr/include:${INCLUDE_PATH-}"
-  export CPATH="${INCLUDE_PATH-}"
-  export CPPPATH="${INCLUDE_PATH-}"
-  export PKG_CONFIG_PATH="$BUILD_DIR/.apt/usr/lib/x86_64-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/i386-linux-gnu/pkgconfig:$BUILD_DIR/.apt/usr/lib/pkgconfig:${PKG_CONFIG_PATH-}"
-  echo "APT packages Installled"
 }
 
 export_env_dir() {
