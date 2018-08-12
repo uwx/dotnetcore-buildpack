@@ -1,13 +1,11 @@
 # Heroku .NET Core Buildpack
 
-Heroku buildpack for .NET Core console applications.
+Heroku buildpack for .NET Core 2.1 console applications.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/5864d533m5d35nsa?svg=true)](https://ci.appveyor.com/project/jincod/dotnetcore-buildpack)
 
 
 ## Usage
-
-.NET Core latest stable
 
 ```bash
 heroku buildpacks:set https://github.com/uwx/dotnetcore-buildpack
@@ -15,7 +13,12 @@ heroku buildpacks:set https://github.com/uwx/dotnetcore-buildpack
 
 Add to your Procfile:
 ```
-dyno: cd $HOME/heroku_output && ./SolutionName
+dyno: cd $HOME/ProjectName && ls -l && ../heroku_output/ProjectName
+```
+
+And make a Projfile marking the main project:
+```
+ProjectName/ProjectName.csproj
 ```
 
 More info
