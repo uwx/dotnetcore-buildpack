@@ -14,6 +14,15 @@ function install_dotnet() {
   mkdir -p ${BUILD_DIR}/.heroku/dotnet && tar zxf $CACHE_DIR/$ZIP_NAME -C ${BUILD_DIR}/.heroku/dotnet
 }
 
+function dotnet_cleanup() {
+  local BUILD_DIR="$1"
+  local CACHE_DIR="$2"
+  local ZIP_NAME="dotnet-2.1.302.tar.gz"
+  
+  rm $CACHE_DIR/$ZIP_NAME
+  rm -rf ${BUILD_DIR}/.heroku/dotnet
+}
+
 # https://github.com/ddollar/heroku-buildpack-apt
 function topic() {
   echo "-----> $*"
